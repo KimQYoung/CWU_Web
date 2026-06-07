@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Career Roadmap</title>
+
+    <!-- 커스텀 스타일 연결 -->
+    <link rel="stylesheet" href="css/style.css">
+
+    <!-- 테마 변경을 화면에 즉시 적용하기 위해 body 이전에 스크립트를 위치시킴. (FOUC 눈뽕 방지용) -->
+    <script src="js/theme.js"></script>
+    <script>
+        const savedTheme = localStorage.getItem('app_theme') || 'auto';
+        if (savedTheme !== 'auto') document.documentElement.setAttribute('data-theme', savedTheme);
+    </script>
+</head>
+
+<body>
+    <!-- 상단 네비게이션 바 -->
+    <nav class="apple-nav">
+        <div class="nav-content">
+            <h1 class="logo">Career Roadmap</h1>
+            <ul class="menu">
+                <li><a href="index.html" id="nav-timeline" class="active">Timeline</a></li>
+                <li><a href="html/profile.html" id="nav-profile">Profile</a></li>
+                <li><a href="html/about.html" id="nav-about">About</a></li>
+                <li><a href="#" id="nav-settings">Settings</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- 메인 사분면 -->
+    <main class="timeline-container">
+        <div id="timeline-view" style="width: 100%; height: 100%; display: flex; flex-direction: column;">
+
+            <!-- 사분면을 그리는 격자 무늬 컨테이너 -->
+            <div class="quadrant-grid" id="quadrant-grid">
+                <!-- 제 1사분면 ~ 4사분면 배경 영역과 라벨(글자) -->
+                <div class="quadrant q1" data-quad="1">
+                    <span class="quad-label">중요 & 긴급</span>
+                </div>
+                <div class="quadrant q2" data-quad="2">
+                    <span class="quad-label">중요 & 덜 긴급</span>
+                </div>
+                <div class="quadrant q3" data-quad="3">
+                    <span class="quad-label">덜 중요 & 긴급</span>
+                </div>
+                <div class="quadrant q4" data-quad="4">
+                    <span class="quad-label">덜 중요 & 덜 긴급</span>
+                </div>
+
+                <!-- 자바스크립트가 로컬 스토리지에서 데이터를 읽어와 아이템(사각형 박스)들을 동적으로 생성해 넣는 빈 공간임. -->
+                <div id="items-container"></div>
+
+                <!-- X축 (시간/긴급도) 텍스트 -->
+                <div class="axis-x">
+                    <span class="axis-title-x"
+                        style="position: absolute; right: 20px; top: -24px; font-size: 12px; color: var(--text-secondary); font-weight: 500;">긴급도(시간)
+                        &rarr;</span>
+                </div>
+                <!-- Y축 (중요도) 텍스트 -->
+                <div class="axis-y">
+                    <span class="axis-title-y"
+                        style="position: absolute; top: 20px; left: 10px; font-size: 12px; color: var(--text-secondary); font-weight: 500;">중요도
+                        &uarr;</span>
+                </div>
+            </div>
+
+            <!-- 하단 컨트롤 바: 배율 조절 버튼과 항목 추가 버튼 -->
+            <div class="timeline-controls">
+                <!-- 레이아웃 균형을 맞추기 위한 빈 공간 -->
+                <div style="flex: 1;"></div>
+
+                <div class="controls-center" style="flex: 1;">
+                    <!-- 타임라인 배율(Week, Month, Quarter) 조절 버튼들 -->
+                    <div class="zoom-level">
+                        <button id="btn-week">Week</button>
+                        <button id="btn-month" class="active">Month</button>
+                        <button id="btn-quarter">Quarter</button>
+                    </div>
+                </div>
+                <div style="flex: 1; display: flex; justify-content: flex-end;">
+                    <!-- 새로운 일정을 추가하는 버튼 -->
+                    <button class="apple-btn" id="add-nav-btn">＋ 항목 추가</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+
+    <!-- ======================= 팝업창 영역 ======================= -->
+
+    <!-- 1. 항목 상세 보기: 사분면 위의 박스를 클릭했을 때 뜨는 상세 설명 창 -->
+    <div id="view-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <button class="close-btn" id="close-view-modal">&times;</button>
+            <h2 id="view-title" style="margin-bottom: 8px;"></h2>
+            <p id="view-date" style="color: var(--text-secondary); font-size: 12px; margin-bottom: 16px;"></p>
+            <div id="view-desc" style="font-size: 14px; margin-bottom: 24px; white-space: pre-wrap; line-height: 1.5;">
+            </div>
+            <button id="btn-edit-item" class="modal-btn"
+                style="background: var(--text-primary); color: var(--bg-color);">수정하기</button>
+            <button id="btn-delete-item" class="modal-btn"
+                style="background: rgba(255,59,48,0.1); color: #ff3b30; margin-top: 8px;">삭제하기</button>
+        </div>
+    </div>
+
+    <!-- 2. 항목 생성/수정: 새로운 데이터를 추가하거나 기존 데이터를 수정할 때 정보를 입력받는 폼(Form) -->
+    <div id="item-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <button class="close-btn" id="close-modal">&times;</button>
+            <h2 id="modal-title">새로운 로드맵 항목</h2>
+            <!-- 사용자가 정보를 입력하면 submit 이벤트를 통해 데이터를 저장함 -->
+            <form id="item-form">
+                <div class="form-group row">
+                    <div style="flex: 2;">
+                        <label>제목</label>
+                        <input type="text" id="item-title" required>
+                    </div>
+                    <div style="flex: 1;">
+                        <label>카테고리</label>
+                        <!-- 디자인을 위해 기본 <select> 대신 div로 만든 커스텀 드롭다운임 -->
+                        <div class="custom-select-wrapper">
+                            <div class="custom-select" id="custom-category-select">
+                                <span class="custom-select-trigger">프로젝트</span>
+                                <div class="custom-options">
+                                    <div class="custom-option selected" data-value="project">프로젝트</div>
+                                    <div class="custom-option" data-value="certification">자격증</div>
+                                    <div class="custom-option" data-value="other">기타</div>
+                                </div>
+                            </div>
+                            <!-- 실제 선택된 값은 이 보이지 않는 input(hidden)에 저장되어 자바스크립트로 전달됨 -->
+                            <input type="hidden" id="item-type" value="project">
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div>
+                        <label>시작일</label>
+                        <input type="date" id="item-start" required>
+                    </div>
+                    <div>
+                        <label>종료일</label>
+                        <input type="date" id="item-end" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>설명 및 참고자료</label>
+                    <textarea id="item-desc" rows="4"
+                        placeholder="내용을 입력하세요. 유튜브나 웹사이트 링크를 포함하면 팝업에서 자동으로 변환되어 표시됩니다."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>테마 색상</label>
+                    <!-- 사용자가 색상 팔레트에서 직접 색을 선택할 수 있는 input 타입임. -->
+                    <input type="color" id="item-color" value="#0071e3"
+                        style="width: 100%; height: 38px; padding: 2px; cursor: pointer; border-radius: 8px;">
+                </div>
+                <!-- 저장 버튼. form 태그 안의 type="submit" 버튼이 눌리면 폼 검증 후 이벤트가 발생함. -->
+                <button type="submit" class="modal-btn">저장</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- 3. 테마 설정 모달: 상단 네비게이션의 'Settings'를 누르면 나타남. -->
+    <div id="settings-modal" class="modal-overlay hidden">
+        <div class="modal-content" style="max-width: 400px;">
+            <button class="close-btn" id="close-settings-modal">&times;</button>
+            <h2 style="margin-bottom: 20px;">설정</h2>
+
+            <div class="form-group">
+                <label>페이지 테마</label>
+                <div class="custom-select-wrapper">
+                    <div class="custom-select" id="theme-select">
+                        <span class="custom-select-trigger">시스템 설정 따름 (자동)</span>
+                        <div class="custom-options">
+                            <div class="custom-option selected" data-value="auto">시스템 설정 따름 (자동)</div>
+                            <div class="custom-option" data-value="light">라이트 모드 (밝게)</div>
+                            <div class="custom-option" data-value="dark">다크 모드 (어둡게)</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 페이지 하단에서 자바스크립트 파일들을 불러옴. 
+         (화면(HTML)을 먼저 사용자에게 보여준 뒤 로직(JS)을 불러오기 위해 보통 <body> 태그 끝에 둠.) -->
+    <!-- 자바스크립트 스크립트 연결 부분 -->
+    <script src="js/script.js"></script>
+</body>
+
+</html>

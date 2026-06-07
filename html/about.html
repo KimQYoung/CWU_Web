@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About - Career Roadmap</title>
+
+    <link rel="stylesheet" href="../css/style.css">
+
+    <script>
+        const savedTheme = localStorage.getItem('app_theme') || 'auto';
+        if (savedTheme !== 'auto') document.documentElement.setAttribute('data-theme', savedTheme);
+    </script>
+</head>
+
+<body>
+    <!-- 상단 네비게이션 바 -->
+    <nav class="apple-nav">
+        <div class="nav-content">
+            <h1 class="logo">Career Roadmap</h1>
+            <ul class="menu">
+                <li><a href="../index.html" id="nav-timeline">Timeline</a></li>
+                <li><a href="profile.html" id="nav-profile">Profile</a></li>
+                <li><a href="about.html" id="nav-about" class="active">About</a></li>
+                <li><a href="#" id="nav-settings">Settings</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- 메인 컨텐츠 영역 -->
+    <main class="main-content"
+        style="padding-top: 80px; height: 100vh; overflow-y: auto; display: flex; flex-direction: column; align-items: center;">
+
+        <div style="max-width: 800px; width: 100%; padding: 0 20px;">
+            <!-- 상단 헤더 -->
+            <div style="text-align: center; margin-bottom: 40px;">
+                <h1
+                    style="font-size: 42px; font-weight: 700; letter-spacing: -1px; margin-bottom: 12px; background: linear-gradient(135deg, var(--text-primary), var(--accent-color)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                    Career Roadmap
+                </h1>
+                <p style="font-size: 18px; color: var(--text-secondary); line-height: 1.5;">
+                    일정과 목표를 입체적으로 관리하는 모던 포트폴리오 대시보드
+                </p>
+            </div>
+
+            <!-- 어바웃 카드 레이아웃 -->
+            <div class="dashboard-grid" style="grid-template-columns: 1fr; gap: 32px;">
+
+                <!-- 1. 프로젝트 소개 -->
+                <div class="dash-card" style="padding: 32px;">
+                    <h2 style="font-size: 24px; margin-bottom: 16px;">프로젝트 소개</h2>
+                    <p style="font-size: 15px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 16px;">
+                        <strong>Career Roadmap</strong>은 일반적인 리스트 형태의 이력서를 넘어,
+                        아이젠하워 매트릭스(중요도/긴급도 사분면)와 시간축(타임라인)을 결합하여
+                        자신의 성장 과정과 목표를 한눈에 파악할 수 있도록 돕는 웹 애플리케이션입니다.
+                    </p>
+                    <p style="font-size: 15px; color: var(--text-secondary); line-height: 1.6;">
+                        서버 없이 순수하게 브라우저의 <strong>Local Storage</strong>만을 사용하여 구동되며,
+                        애플 웹사이트 디자인과 비슷한 느낌을 주도록 제작되었습니다.
+                    </p>
+                </div>
+
+                <!-- 2. 주요 기능 -->
+                <div class="dash-card" style="padding: 32px;">
+                    <h2 style="font-size: 24px; margin-bottom: 16px;">주요 기능</h2>
+                    <ul style="list-style: none; padding: 0; display: flex; flex-direction: column; gap: 16px;">
+                        <li style="display: flex; gap: 12px; align-items: flex-start;">
+                            <span style="font-size: 20px;">🖱️</span>
+                            <div>
+                                <h4 style="font-size: 16px; margin-bottom: 4px;">Drag & Drop 타임라인</h4>
+                                <p style="font-size: 14px; color: var(--text-secondary); line-height: 1.4;">
+                                    사분면 위에서 일정을 마우스로 자유롭게 끌어다 놓고 크기를 조절하여 중요도와 기간을 시각적으로 배치할 수 있습니다.
+                                </p>
+                            </div>
+                        </li>
+                        <li style="display: flex; gap: 12px; align-items: flex-start;">
+                            <span style="font-size: 20px;">📊</span>
+                            <div>
+                                <h4 style="font-size: 16px; margin-bottom: 4px;">통계 및 프로필 대시보드</h4>
+                                <p style="font-size: 14px; color: var(--text-secondary); line-height: 1.4;">
+                                    Chart.js를 활용하여 등록된 목표들의 중요도 분포와 달성 현황을 아름다운 그래프로 한눈에 요약해 줍니다.
+                                </p>
+                            </div>
+                        </li>
+                        <li style="display: flex; gap: 12px; align-items: flex-start;">
+                            <span style="font-size: 20px;">🤖</span>
+                            <div>
+                                <h4 style="font-size: 16px; margin-bottom: 4px;">AI 프롬프트 추출기</h4>
+                                <p style="font-size: 14px; color: var(--text-secondary); line-height: 1.4;">
+                                    입력한 포트폴리오 데이터를 모아 ChatGPT 등 인공지능에게 전달하기 완벽한 프롬프트 텍스트로 자동 변환해 줍니다.
+                                </p>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- 3. 개발자 소개 -->
+                <div class="dash-card"
+                    style="padding: 32px; text-align: center; background: linear-gradient(to bottom, var(--bg-glass), rgba(0,113,227,0.05)); border: 1px solid var(--border-color);">
+                    <div style="font-size: 48px; margin-bottom: 16px;">👨‍💻</div>
+                    <h2 style="font-size: 24px; margin-bottom: 8px;">김규영</h2>
+                    <p style="font-size: 15px; color: var(--text-secondary); margin-bottom: 24px;">
+                        성장하는 개발자
+                    </p>
+                    <a href="https://github.com/KimQYoung" target="_blank" class="apple-btn"
+                        style="text-decoration: none; padding: 10px 24px; font-size: 14px;">
+                        GitHub 방문하기
+                    </a>
+                </div>
+
+            </div>
+
+            <!-- 하단 여백 -->
+            <div style="height: 60px;"></div>
+        </div>
+    </main>
+
+    <!-- 테마 설정 팝업 -->
+    <div id="settings-modal" class="modal-overlay hidden">
+        <div class="modal-content" style="max-width: 400px;">
+            <button class="close-btn" id="close-settings-modal">&times;</button>
+            <h2 style="margin-bottom: 20px;">설정</h2>
+            <div class="form-group">
+                <label>페이지 테마</label>
+                <div class="custom-select-wrapper">
+                    <div class="custom-select" id="theme-select">
+                        <span class="custom-select-trigger">시스템 설정 따름 (자동)</span>
+                        <div class="custom-options">
+                            <div class="custom-option selected" data-value="auto">시스템 설정 따름 (자동)</div>
+                            <div class="custom-option" data-value="light">라이트 모드 (밝게)</div>
+                            <div class="custom-option" data-value="dark">다크 모드 (어둡게)</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 스크립트 연결 -->
+    <script src="../js/script.js"></script>
+    <script src="../js/theme.js"></script>
+</body>
+
+</html>

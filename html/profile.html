@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>프로필 대시보드 - Career Roadmap</title>
+
+    <link rel="stylesheet" href="../css/style.css">
+
+    <script>
+        const savedTheme = localStorage.getItem('app_theme') || 'auto';
+        if (savedTheme !== 'auto') document.documentElement.setAttribute('data-theme', savedTheme);
+    </script>
+
+    <!-- 차트(그래프)를 그리기 위한 Chart.js 외부 라이브러리 로드 -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+    <!-- 상단 네비게이션 바 -->
+    <nav class="apple-nav">
+        <div class="nav-content">
+            <h1 class="logo">Career Roadmap</h1>
+            <ul class="menu">
+                <li><a href="../index.html" id="nav-timeline">Timeline</a></li>
+                <!-- 프로필 페이지이므로 현재 탭에 'active' 클래스를 주어 굵게/색상을 다르게 표시함 -->
+                <li><a href="profile.html" id="nav-profile" class="active">Profile</a></li>
+                <li><a href="about.html" id="nav-about">About</a></li>
+                <li><a href="#" id="nav-settings">Settings</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- 메인 컨텐츠: 프로필 정보, 차트, 포트폴리오 목록이 들어갈 영역임 -->
+    <main class="main-content" style="padding-top: 48px; height: 100vh;">
+        <div id="profile-view">
+
+            <!-- 1. 개인 프로필 카드 영역 (좌측 상단 아바타 및 이름) -->
+            <div class="profile-user-card">
+                <div class="profile-avatar">🦁</div>
+                <div class="profile-details">
+                    <h2 id="display-name"></h2>
+                    <p id="display-bio" class="bio-text"></p>
+
+                    <!-- 깃허브링크 버튼 (데이터가 없으면 hidden으로 숨겨짐) -->
+                    <div class="social-links">
+                        <a id="link-github" href="#" target="_blank" class="social-btn hidden">GitHub</a>
+                    </div>
+
+                    <!-- 사용 가능한 기술 스택을 뱃지 형태로 보여주는 구역임 -->
+                    <div id="tech-stack-section" style="margin-top: 16px;" class="hidden">
+                        <h3
+                            style="font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-secondary); margin-bottom: 8px;">
+                            Tech Stack</h3>
+                        <div id="tech-stack-container" class="tech-stack-container" style="margin-top: 0;"></div>
+                    </div>
+                </div>
+
+                <!-- 우측 버튼들 (프로필 수정 및 AI 프롬프트 복사) -->
+                <div style="display: flex; flex-direction: column; gap: 8px; align-self: flex-start;">
+                    <button id="btn-edit-profile" class="apple-btn"
+                        style="background: rgba(0,0,0,0.05); color: var(--text-primary); width: 100%;">프로필 수정</button>
+                    <!-- 프롬프트 내보내기 버튼 (AI에게 줄 데이터 텍스트 생성용) -->
+                    <button id="btn-export-prompt" class="apple-btn"
+                        style="background: var(--accent-color); color: #fff; width: 100%;">🤖 프롬프트 복사</button>
+                </div>
+            </div>
+
+            <!-- 2. 두 개의 탭 이동 -->
+            <div class="segmented-control-wrapper">
+                <div class="segmented-control">
+                    <!-- 클릭 시 data-target에 적힌 id 값을 가진 구역을 화면에 보여줌 -->
+                    <button class="segment-btn active" data-target="view-summary">📊 프로필 요약</button>
+                    <button class="segment-btn" data-target="view-portfolio">📁 포트폴리오 목록</button>
+                </div>
+            </div>
+
+            <!-- 탭 내용 A: 프로필 요약 -->
+            <div id="view-summary" class="tab-content active">
+                <div class="dashboard-grid">
+                    <!-- 등록된 총 항목 수 -->
+                    <div class="dash-card summary-card">
+                        <h3>총 등록 항목</h3>
+                        <div id="total-items-count" class="dash-number">0</div>
+                        <p style="color: var(--text-secondary); font-size: 14px;">작성된 목표 및 포트폴리오</p>
+                    </div>
+                    <!-- 중요도 분포를 그릴 도넛 차트 캔버스 -->
+                    <div class="dash-card">
+                        <h3>중요도 분포</h3>
+                        <div class="chart-container">
+                            <canvas id="importanceChart"></canvas>
+                        </div>
+                    </div>
+                    <!-- 진행 완료 vs 예정 목표 비율을 그릴 파이 차트 캔버스 -->
+                    <div class="dash-card">
+                        <h3>과거(진행완료) vs 미래(목표)</h3>
+                        <div class="chart-container">
+                            <canvas id="timeChart"></canvas>
+                        </div>
+                    </div>
+                    <!-- 가장 날짜가 가까운 일정들 리스트 -->
+                    <div class="dash-card full-width">
+                        <h3>다가오는 핵심 목표</h3>
+                        <ul id="upcoming-goals-list" class="goals-list"></ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 탭 내용 B: 포트폴리오 목록 -->
+            <!-- 평소엔 hidden으로 숨겨져 있다가 탭을 누르면 보여줌 -->
+            <div id="view-portfolio" class="tab-content hidden">
+                <div class="horizontal-timeline-container">
+                    <div class="horizontal-line"></div>
+                    <!-- 자바스크립트로 연도별 점이 생성될 영역임 -->
+                    <div id="h-timeline-dots" class="h-timeline-dots"></div>
+                </div>
+                <!-- 클릭한 점에 해당하는 포트폴리오 카드들이 표시될 영역임 -->
+                <div id="active-portfolio-display" class="active-portfolio-display">
+                    <p style="text-align:center; color: var(--text-secondary); margin-top: 40px;">등록된 항목이 없습니다.</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- ======================= 팝업창 영역 ======================= -->
+
+    <!-- 1. 프로필 수정 팝업 -->
+    <div id="profile-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <button class="close-btn" id="close-profile-modal">&times;</button>
+            <h2 style="margin-bottom: 20px;">프로필 수정</h2>
+            <!-- 사용자 정보 입력 폼 -->
+            <form id="profile-form">
+                <div class="form-group">
+                    <label>이름</label>
+                    <input type="text" id="input-name" required placeholder="예: 홍길동">
+                </div>
+                <div class="form-group">
+                    <label>한 줄 소개</label>
+                    <input type="text" id="input-bio" placeholder="예: 성장하는 프론트엔드 개발자입니다.">
+                </div>
+                <div class="form-group">
+                    <label>기술 스택 (쉼표로 구분)</label>
+                    <input type="text" id="input-tech" placeholder="예: HTML, CSS, JavaScript, React">
+                </div>
+                <div class="form-group">
+                    <label>GitHub URL</label>
+                    <input type="url" id="input-github" placeholder="https://github.com/...">
+                </div>
+                <button type="submit" class="modal-btn">저장하기</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- 3. 테마 설정 팝업 -->
+    <div id="settings-modal" class="modal-overlay hidden">
+        <div class="modal-content" style="max-width: 400px;">
+            <button class="close-btn" id="close-settings-modal">&times;</button>
+            <h2 style="margin-bottom: 20px;">설정</h2>
+            <div class="form-group">
+                <label>페이지 테마</label>
+                <div class="custom-select-wrapper">
+                    <div class="custom-select" id="theme-select">
+                        <span class="custom-select-trigger">시스템 설정 따름 (자동)</span>
+                        <div class="custom-options">
+                            <div class="custom-option selected" data-value="auto">시스템 설정 따름 (자동)</div>
+                            <div class="custom-option" data-value="light">라이트 모드 (밝게)</div>
+                            <div class="custom-option" data-value="dark">다크 모드 (어둡게)</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. AI 프롬프트 생성 모달 -->
+    <!-- 사용자의 데이터를 읽어 모아서 만든 질문지가 이 textarea 창에 담겨 출력됨 -->
+    <div id="prompt-modal" class="modal-overlay hidden">
+        <div class="modal-content" style="max-width: 600px;">
+            <button class="close-btn" id="close-prompt-modal">&times;</button>
+            <h2 style="margin-bottom: 12px;">포트폴리오 생성 프롬프트</h2>
+            <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 16px; line-height: 1.4;">
+                이 텍스트를 복사하여 <b>ChatGPT, Claude, Gemini</b> 등 AI에게 전달하시면 자동으로 멋진 포트폴리오/이력서 웹페이지를 만들어 줌!
+            </p>
+            <!-- 사용자가 복사하기 쉽도록 해 줄 읽기 전용 텍스트 상자임 -->
+            <textarea id="prompt-textarea"
+                style="width: 100%; height: 300px; padding: 12px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-color); color: var(--text-primary); font-family: inherit; font-size: 13px; resize: vertical; overflow-y: auto; white-space: pre-wrap;"
+                readonly></textarea>
+            <button id="btn-copy-prompt" class="modal-btn" style="margin-top: 16px;">텍스트 복사하기</button>
+        </div>
+    </div>
+
+    <script src="../js/theme.js"></script>
+    <script src="../js/script.js"></script>
+    <script src="../js/profile.js"></script>
+</body>
+
+</html>
