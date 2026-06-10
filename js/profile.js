@@ -1,22 +1,17 @@
-/**
- * profile.js
- * 이 파일은 프로필 화면(Profile)의 요약 차트(Chart.js) 그리기, 포트폴리오 목록 나열,
- * 프로필 정보 수정, 그리고 AI 프롬프트 생성(추출) 로직을 담당함.
- */
 
 // 페이지가 완전히 켜졌을 때 즉시 실행되는 초기화 구역임.
 document.addEventListener('DOMContentLoaded', () => {
-    // 1. script.js에 만들어둔 공통 함수로 아이템 데이터를 싹 불러옴.
+    // script.js에 만들어둔 공통 함수로 아이템 데이터를 불러옴.
     let items = loadRoadmapItems();
 
-    // 2. 불러온 데이터를 바탕으로 각 화면 요소들을 그려주는 함수들을 차례로 호출함.
+    // 불러온 데이터를 바탕으로 각 화면 요소들을 그려주는 함수들을 차례로 호출함.
     renderDashboard(items);     // 차트와 통계 숫자를 그림
     renderPortfolioList(items); // 가로 연대기 포트폴리오 목록을 그림
     initProfileData();          // 사용자 이름, 소개글 등을 세팅
     initTabLogic();             // [프로필 요약] / [포트폴리오 목록] 탭 전환 기능 세팅
 });
 
-// --- 탭 메뉴(세그먼트 컨트롤) 동작 로직 ---
+// 탭 메뉴(세그먼트 컨트롤) 동작 로직
 // 두 개의 탭 버튼을 클릭할 때마다 화면 내용을 바꿔치기 함.
 function initTabLogic() {
     const segmentBtns = document.querySelectorAll('.segment-btn');
@@ -41,7 +36,6 @@ function initTabLogic() {
 }
 
 // 가로 연대기(점 찍히는 타임라인) 그리는 함수
-// 처음에 이거 flex로 가로 정렬하느라 애먹었음
 function renderPortfolioList(items, selectedId = null) {
     const dotsContainer = document.getElementById('h-timeline-dots');
     const displayContainer = document.getElementById('active-portfolio-display');
@@ -77,13 +71,13 @@ function renderPortfolioList(items, selectedId = null) {
         const badgeColor = item.color || 'var(--accent-color)';
         const dateLabel = (item.start && item.start !== 'undefined') ? item.start : '날짜 없음';
 
-        // 점이랑 라벨 HTML 쑤셔넣기
+        // 점이랑 라벨 HTML
         dotWrapper.innerHTML = `
             <div class="h-date-label">${dateLabel}</div>
             <div class="h-dot" style="background: ${badgeColor};"></div>
         `;
 
-        // [프로세스 3] 점 클릭 이벤트 부여
+        // 점 클릭 이벤트 부여
         // 사용자가 점을 클릭하면 현재 항목의 상세 카드(renderActivePortfolioCard)를 띄워줌.
         dotWrapper.addEventListener('click', () => {
             // 모든 점의 활성화 상태(파란색 하이라이트)를 끄고, 방금 클릭한 점만 다시 켬.
@@ -96,7 +90,7 @@ function renderPortfolioList(items, selectedId = null) {
         if (dotsContainer) dotsContainer.appendChild(dotWrapper);
     });
 
-    // [프로세스 4] 모든 점 생성이 끝나면, 맨 처음 항목의 카드를 강제로 보여줌.
+    // 모든 점 생성이 끝나면, 맨 처음 항목의 카드를 강제로 보여줌.
     if (initialItem) renderActivePortfolioCard(initialItem);
 }
 
@@ -318,7 +312,7 @@ function renderProfileInfo() {
     displayName.innerText = userProfile.name || '홍길동';
     displayBio.innerText = userProfile.bio || '웹 개발자 포트폴리오 로드맵';
 
-    // 기술 스택 (Tech Stack) 화면에 그리기
+    // 기술 스택 화면에 그리기
     const techSection = document.getElementById('tech-stack-section');
     const techContainer = document.getElementById('tech-stack-container');
     techContainer.innerHTML = '';
@@ -465,9 +459,9 @@ document.addEventListener('click', () => {
     document.querySelectorAll('.custom-select').forEach(el => el.classList.remove('open'));
 });
 
-// --- AI 프롬프트 생성 로직 (프롬프트 추출기) ---
+// AI 프롬프트 생성 로직
 function generatePromptText() {
-    // 1. 프로필 정보 불러오기
+    // 프로필 정보 불러오기
     const storedProfile = localStorage.getItem('roadmap_user_profile');
     let userProfile = storedProfile ? JSON.parse(storedProfile) : {
         name: "김규영",
@@ -476,10 +470,10 @@ function generatePromptText() {
         github: "https://github.com/KimQYoung"
     };
 
-    // 2. 포트폴리오(로드맵) 정보 불러오기
+    // 포트폴리오 정보 불러오기
     let items = loadRoadmapItems();
 
-    // 항목들을 시작일(최신순) 기준으로 정렬함.
+    // 항목들을 시작일 기준으로 정렬함.
     const sortedItems = [...items].sort((a, b) => b.start.localeCompare(a.start));
 
     let promptStr = `다음은 제 프로필과 포트폴리오 데이터입니다. 이 데이터를 바탕으로 채용 담당자나 외부 제출용으로 적합한 매력적인 포트폴리오 웹사이트 코드를 작성해주세요.\n\n`;
@@ -502,7 +496,7 @@ function generatePromptText() {
             promptStr += `* ${item.title} (${typeStr})\n`;
             promptStr += `  - 기간: ${item.start} ~ ${item.end}\n`;
             if (item.desc) {
-                // 설명문은 줄바꿈이 있을 수 있으니 깔끔하게 정리해서 넣음.
+                // 설명문은 줄바꿈이 있을 수 있으니 정리해서 넣음.
                 const cleanDesc = item.desc.split('\n').map(line => `  - ${line}`).join('\n');
                 promptStr += `${cleanDesc}\n`;
             }
@@ -548,10 +542,10 @@ if (closePromptModalBtn) {
 
 if (btnCopyPrompt) {
     btnCopyPrompt.addEventListener('click', () => {
-        // 텍스트 상자의 내용 전체를 선택(블록 지정)함.
+        // 텍스트 상자의 내용 전체를 선택(블록 지정)
         promptTextarea.select();
 
-        // 사용자의 클립보드(복사 공간)에 해당 텍스트를 복사하는 명령어임.
+        // 사용자의 클립보드(복사 공간)에 해당 텍스트를 복사하는 명령어
         document.execCommand('copy');
 
         // 성공적으로 복사되었음을 버튼 글자를 바꿔서 알려줌.
